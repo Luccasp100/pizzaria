@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+      function excluir (r,n,c){
+          if (confirm("Deseja realmente apagar o registro?")){
+            document.getElementById("ra").value    = r;
+            document.getElementById("nome").value  = n;
+            document.getElementById("curso").value = c;
+            enviar("excluir");
+          }
+      }
+
+      function editar(r,n,c){
+          document.getElementById("ra").value = r;
+          document.getElementById("nome").value = n;
+          document.getElementById("curso").value = c;
+      }
+
+      function montar_tabela(jsonResp){
+        var linhas = "";
+        for (i=0;i<jsonResp.length;i++){
+          var ra    = jsonResp[i].ra;
+          var nome  = jsonResp[i].nome;
+          var curso = jsonResp[i].curso;
+          var l = `<tr>
+                    <td><img src="/img/delete.png" onClick="excluir(${ra},'${nome}','${curso}')"/></td>
+                    <td><img src="/img/edit.png" onClick="editar(${ra},'${nome}','${curso}')"/></td>
+                    <td>${ra}</td>
+                    <td>${nome}</td>
+                    <td>${curso}</td>
+                  </tr>`;
+          linhas += l;
+        }
+        document.getElementById("corpo_tabela").innerHTML = linhas;
+      }      
+
+      function limpar(){
+        document.getElementById("ra").value = "";
+        document.getElementById("nome").value = "";
+        document.getElementById("curso").value = "";
+      }
+
+      function enviar(acao){
+        var jsonEnvio = {};
+        jsonEnvio.nome  = document.getElementById("nome").value;
+        jsonEnvio.curso = document.getElementById("senha").value;
+        jsonEnvio.acao  = acao;
+        limpar();
+        if (acao=="salvar"){
+            if (jsonEnvio.ra==""){
+                jsonEnvio.acao = "inserir";
+            }else{
+                jsonEnvio.acao = "alterar"
+            }
+        }
+        $.ajax({
+            //url: "AlunoController.php", //para php
+            //url: "AlunoServlet", //para java EE
+            url: "/aluno/" + jsonEnvio.acao + "/",
+            data: jsonEnvio,
+            type: "get",
+            success: function (jsonResp){
+                if (acao=="consultar"){
+                    // Se for backend em java ou php adicionar a linha abaixo
+                    //jsonResp = JSON.parse(jsonResp);
+                    montar_tabela(jsonResp);
+                }else{
+                    alert(jsonResp);
+                    enviar('consultar');
+                }
+            },
+            error: function () {
+                alert("Ocorreu um erro ao executar a ação!!!");
+            }
+        });
+      }
+    </script>
+
+    <link rel="stylesheet" href="login.css">
+
+  </head>
+  <body>
+        
+    <div class="container text-left">
+      <div class="row">
+        <div class="col">
+            <a href="index.html">Voltar</a>
+        </div>
+        <div class="col-8">
+          
+          <div class="usuario">
+            <label for="nome" class="form-label">E-mail</label>
+            <input type="text" class="form-control" id="nome" placeholder="">
+          </div>
+          <div class="senha">
+            <label for="senha" class="form-label">Senha</label>
+            <input type="password"  class="form-control" id="curso" placeholder="">
+          </div>
+          <div class="senha">
+            <label for="senha" class="form-label">Confirme a sua Senha</label>
+            <input type="password"  class="form-control" id="curso" placeholder="">
+          </div>
+          
+          <br>
+          <button type="button" class="btn btn-primary" onClick="enviar('salvar')">Registrar</button>
+          <br><br>
+
+        </div>
+        <div class="col">
+        </div>
+      </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  
+    </body>
+</html>
